@@ -166,7 +166,7 @@ def train(context, conf_name: str, dataset: str, data_dir: str, epochs: int):
     if(data_dir.endswith("/")):
         data_dir = data_dir.rstrip(data_dir[-1])
 
-    hparams = parse_configuration("./cfg/image_classification/" + conf_name)
+    hparams = parse_configuration("cfg/image_classification/" + conf_name)
     hparams.dataset = dataset 
     hparams.data_dir = data_dir + "/dataset"
     hparams.output_folder = data_dir + "/model"
