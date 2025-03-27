@@ -1,0 +1,4 @@
+micromind
+torch
+timm==0.6.13
+#digitalhub-runtime-container==0.10.0
