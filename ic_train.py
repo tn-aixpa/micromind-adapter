@@ -197,7 +197,7 @@ def train(context, conf_name: str, dataset: str, data_dir: str, epochs: int):
 
     mind.test(datasets={"test": val_loader}, metrics=[top1, top5])
 
-    project.log_model(
+    model = project.log_model(
         name="micromind-model-" + hparams.model,
         kind="model",
         source=hparams.output_folder,
@@ -205,3 +205,5 @@ def train(context, conf_name: str, dataset: str, data_dir: str, epochs: int):
         framework="pytorch",
         tags=["image_classification"],
     )
+
+    #model.log_metric()

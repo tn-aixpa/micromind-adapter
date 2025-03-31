@@ -1,4 +1,6 @@
 micromind
 torch
+opencv-python
+ultralytics==8.0.215
 timm==0.6.13
 #digitalhub-runtime-container==0.10.0
