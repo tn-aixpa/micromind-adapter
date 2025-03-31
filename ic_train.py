@@ -207,3 +207,6 @@ def train(context, conf_name: str, dataset: str, data_dir: str, epochs: int):
     )
 
     #model.log_metric()
+
+#if __name__ == "__main__":
+#    train(None, "phinet.py", "torch/cifar10", "/home/nori/data", 5)
