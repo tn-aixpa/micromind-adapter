@@ -10,8 +10,8 @@ from timm.loss import (
 import micromind as mm
 from micromind.networks import PhiNet, XiNet
 from micromind.utils import parse_configuration
-import sys
-
+#import sys
+#import digitalhub as dh
 
 class ImageClassification(mm.MicroMind):
     """Implements an image classification class. Provides support
