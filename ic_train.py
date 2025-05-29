@@ -10,8 +10,8 @@ from timm.loss import (
 import micromind as mm
 from micromind.networks import PhiNet, XiNet
 from micromind.utils import parse_configuration
-#import sys
-#import digitalhub as dh
+import sys
+import digitalhub as dh
 
 class ImageClassification(mm.MicroMind):
     """Implements an image classification class. Provides support
@@ -160,13 +160,14 @@ def top_k_accuracy(k=1):
     return acc
 
 def train(context, conf_name: str, dataset: str, data_dir: str, epochs: int):
-    #project = dh.get_or_create_project("micromind")
     project = context.project
+    #project = dh.get_or_create_project("micromind")
 
     if(data_dir.endswith("/")):
         data_dir = data_dir.rstrip(data_dir[-1])
 
     hparams = parse_configuration("/shared/cfg/image_classification/" + conf_name)
+    #hparams = parse_configuration("cfg/image_classification/" + conf_name)
     hparams.dataset = dataset 
     hparams.data_dir = data_dir + "/dataset"
     hparams.output_folder = data_dir + "/model"
@@ -197,16 +198,20 @@ def train(context, conf_name: str, dataset: str, data_dir: str, epochs: int):
 
     mind.test(datasets={"test": val_loader}, metrics=[top1, top5])
 
+    #TODO find model file path
+    model_path = exp_folder + "/save/" + mm.utils.checkpointer.get_latest_checkpoint(exp_folder) + "/state-dict.pth.tar"
+
     model = project.log_model(
         name="micromind-model-" + hparams.model,
         kind="model",
-        source=hparams.output_folder,
+        source=model_path,
         algorithm=hparams.model,
         framework="pytorch",
         tags=["image_classification"],
     )
 
+    #TODO log metrics
     #model.log_metric()
 
-#if __name__ == "__main__":
-#    train(None, "phinet.py", "torch/cifar10", "/home/nori/data", 5)
+if __name__ == "__main__":
+    train(None, "phinet.py", "torch/cifar10", "/home/dev/micromind/", 5)
