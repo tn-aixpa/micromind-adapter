@@ -10,7 +10,10 @@ from timm.loss import (
 import micromind as mm
 from micromind.networks import PhiNet, XiNet
 from micromind.utils import parse_configuration
+
 import sys
+import os
+
 import digitalhub as dh
 
 class ImageClassification(mm.MicroMind):
@@ -159,15 +162,24 @@ def top_k_accuracy(k=1):
 
     return acc
 
+def get_latest_checkpoint(exp_folder):
+    save_path = exp_folder + "/save"
+    subdirs = [os.path.join(save_path, d) for d in os.listdir(save_path) if os.path.isdir(os.path.join(save_path, d))]
+    if not subdirs:
+        return save_path
+    latest_subdir = max(subdirs, key=os.path.getmtime)
+    return latest_subdir
+
+
 def train(context, conf_name: str, dataset: str, data_dir: str, epochs: int):
-    project = context.project
-    #project = dh.get_or_create_project("micromind")
+    #project = context.project
+    project = dh.get_or_create_project("micromind-image-classification")
 
     if(data_dir.endswith("/")):
         data_dir = data_dir.rstrip(data_dir[-1])
 
-    hparams = parse_configuration("/shared/cfg/image_classification/" + conf_name)
-    #hparams = parse_configuration("cfg/image_classification/" + conf_name)
+    #hparams = parse_configuration("/shared/cfg/image_classification/" + conf_name)
+    hparams = parse_configuration("cfg/image_classification/" + conf_name)
     hparams.dataset = dataset 
     hparams.data_dir = data_dir + "/dataset"
     hparams.output_folder = data_dir + "/model"
@@ -199,7 +211,7 @@ def train(context, conf_name: str, dataset: str, data_dir: str, epochs: int):
     mind.test(datasets={"test": val_loader}, metrics=[top1, top5])
 
     #TODO find model file path
-    model_path = exp_folder + "/save/" + mm.utils.checkpointer.get_latest_checkpoint(exp_folder) + "/state-dict.pth.tar"
+    model_path = get_latest_checkpoint(exp_folder) + "/state-dict.pth.tar"
 
     model = project.log_model(
         name="micromind-model-" + hparams.model,
@@ -214,4 +226,4 @@ def train(context, conf_name: str, dataset: str, data_dir: str, epochs: int):
     #model.log_metric()
 
 if __name__ == "__main__":
-    train(None, "phinet.py", "torch/cifar10", "/home/dev/micromind/", 5)
+    train(None, "phinet.py", "torch/cifar10", "/home/dev/micromind/", 1)
