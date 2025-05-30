@@ -11,6 +11,9 @@ from ic_train import ImageClassification
 from micromind.utils import parse_configuration
 from multipart import parse_form_data, is_form_request
 
+from wsgiref.simple_server import make_server
+import json
+
 import digitalhub as dh
 
 class ImageClassification(ImageClassification):
@@ -70,7 +73,7 @@ def top_k_accuracy(k=1):
 
 def init(context, model_name:str, data_dir:str, conf_name:str):
     """Initializes the inference context with the model and configurations."""
-    context.logger.info(f"Initializing inference context for {model_name}")
+    print(f"Initializing inference context for {model_name}")
 
     #project = context.project
     project = dh.get_or_create_project("micromind-image-classification")
@@ -85,16 +88,16 @@ def init(context, model_name:str, data_dir:str, conf_name:str):
     # file temporary path
     try:
         os.mkdir(data_dir + "/upload")
-        context.logger.info("create dir data/upload")
+        print("create dir data/upload")
     except OSError as error:
-        context.logger.warn(f"create dir data/upload error:{error}")
+        print(f"create dir data/upload error:{error}")
 
     #download model
     try:
         os.mkdir(data_dir + "/trained_model")
-        context.logger.info("create dir data/trained_model")
+        print("create dir data/trained_model")
     except OSError as error:
-        context.logger.warn(f"create dir data/trained_model error:{error}")
+        print(f"create dir data/trained_model error:{error}")
 
     model = project.get_model(model_name)
     model_path = model.download(destination=data_dir + "/trained_model")
@@ -103,7 +106,7 @@ def init(context, model_name:str, data_dir:str, conf_name:str):
     mind = ImageClassification(hparams=hparams)
     mind.eval()
 
-    context.logger.info(f"init done:{mind}")
+    print(f"init done:{mind}")
     setattr(context, "hparams", hparams)
     setattr(context, "mind", mind)
 
@@ -178,3 +181,46 @@ def serve_multipart(context, event):
     except Exception as e:
         context.logger.error(f"serve_multipart error:{e}")
         return context.Response(body=f"Error:{e}", status_code=500)
+
+
+def simple_app(environ, start_response):
+    result = {}
+    if is_form_request(environ):
+        forms, files = parse_form_data(environ)
+        for filed_name in files:
+            try:
+                file_details = files[filed_name]
+                print(f"process file:{file_details.filename}")
+                filename = "/home/nori/upload/" + id_generator() + "_" + file_details.filename
+                file_details.save_as(filename) 
+
+                classification_result = []
+                result[filed_name] = classification_result
+                for idx, prob in inference(context.mind, context.hparams, filename):
+                    info = {}
+                    info['class'] = idx
+                    info['probability'] = prob
+                    classification_result.append(info)
+
+                if os.path.exists(filename):
+                    os.remove(filename)
+            except Exception as e:
+                print(e)
+
+    status = '200 OK'
+    headers = [('Content-type', 'application/json; charset=utf-8')]
+    content = json.dumps(result)
+    content = [content.encode('utf-8')]
+    start_response(status, headers)
+
+
+context = {}
+
+if __name__ == "__main__":
+    init(context, "micromind-model-phinet", "/home/nori/micromind", "phinet.py")
+
+    with make_server('', 8051, simple_app) as httpd:
+        print("Serving on port 8051...")
+        httpd.serve_forever()
+
+    # Example usage
