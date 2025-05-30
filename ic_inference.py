@@ -97,7 +97,7 @@ def init(context, model_name:str, data_dir:str, conf_name:str):
         context.logger.warn(f"create dir data/trained_model error:{error}")
 
     model = project.get_model(model_name)
-    model_path = model.download()
+    model_path = model.download(destination=data_dir + "/trained_model")
 
     hparams.ckpt_pretrained = model_path
     mind = ImageClassification(hparams=hparams)
