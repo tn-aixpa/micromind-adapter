@@ -214,9 +214,13 @@ def simple_app(environ, start_response):
     start_response(status, headers)
 
 
-context = {}
+class Context:
+    data_dir = "/home/nori/micromind"
+    hparams = None
+    mind = None
 
 if __name__ == "__main__":
+    context = Context()
     init(context, "micromind-model-phinet", "/home/nori/micromind", "phinet.py")
 
     with make_server('', 8051, simple_app) as httpd:
