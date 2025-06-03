@@ -1,5 +1,5 @@
 micromind
-torch
+#torch
 opencv-python
 ultralytics==8.0.215
 timm==0.6.13

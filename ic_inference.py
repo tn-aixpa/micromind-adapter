@@ -3,6 +3,7 @@ import sys
 import time
 import string
 import random
+import traceback
 
 import torch
 import torchvision
@@ -205,6 +206,7 @@ def simple_app(environ, start_response):
                 if os.path.exists(filename):
                     os.remove(filename)
             except Exception as e:
+                traceback.print_exc()
                 print(e)
 
     status = '200 OK'
