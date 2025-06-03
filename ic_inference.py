@@ -197,7 +197,7 @@ def simple_app(environ, start_response):
 
                 classification_result = []
                 result[filed_name] = classification_result
-                for idx, prob in inference(context.mind, context.hparams, filename):
+                for idx, prob in inference(main_context.mind, main_context.hparams, filename):
                     info = {}
                     info['class'] = idx
                     info['probability'] = prob
@@ -222,8 +222,8 @@ class Context:
     mind = None
 
 if __name__ == "__main__":
-    context = Context()
-    init(context, "micromind-model-phinet", "/home/nori/data", "phinet.py")
+    main_context = Context()
+    init(main_context, "micromind-model-phinet", "/home/nori/data", "phinet.py")
 
     with make_server('', 8051, simple_app) as httpd:
         print("Serving on port 8051...")
