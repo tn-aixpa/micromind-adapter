@@ -191,7 +191,7 @@ def simple_app(environ, start_response):
             try:
                 file_details = files[filed_name]
                 print(f"process file:{file_details.filename}")
-                filename = "/home/nori/upload/" + id_generator() + "_" + file_details.filename
+                filename = "/home/nori/data/upload/" + id_generator() + "_" + file_details.filename
                 file_details.save_as(filename) 
 
                 classification_result = []
@@ -215,13 +215,13 @@ def simple_app(environ, start_response):
 
 
 class Context:
-    data_dir = "/home/nori/micromind"
+    data_dir = "/home/nori/data"
     hparams = None
     mind = None
 
 if __name__ == "__main__":
     context = Context()
-    init(context, "micromind-model-phinet", "/home/nori/micromind", "phinet.py")
+    init(context, "micromind-model-phinet", "/home/nori/data", "phinet.py")
 
     with make_server('', 8051, simple_app) as httpd:
         print("Serving on port 8051...")
