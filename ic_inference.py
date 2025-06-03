@@ -4,6 +4,7 @@ import time
 import string
 import random
 import traceback
+import io
 
 import torch
 import torchvision
@@ -76,15 +77,15 @@ def init(context, model_name:str, data_dir:str, conf_name:str):
     """Initializes the inference context with the model and configurations."""
     print(f"Initializing inference context for {model_name}")
 
-    #project = context.project
-    project = dh.get_or_create_project("micromind-image-classification")
+    project = context.project
+    #project = dh.get_or_create_project("micromind-image-classification")
 
     if(data_dir.endswith("/")):
         data_dir = data_dir.rstrip(data_dir[-1])
     setattr(context, "data_dir", data_dir)
 
-    #hparams = parse_configuration("/shared/cfg/image_classification/" + conf_name)
-    hparams = parse_configuration("cfg/image_classification/" + conf_name)
+    hparams = parse_configuration("/shared/cfg/image_classification/" + conf_name)
+    #hparams = parse_configuration("cfg/image_classification/" + conf_name)
 
     # file temporary path
     try:
@@ -107,7 +108,6 @@ def init(context, model_name:str, data_dir:str, conf_name:str):
     mind = ImageClassification(hparams=hparams)
     mind.eval()
 
-    print(f"init done:{mind}")
     setattr(context, "hparams", hparams)
     setattr(context, "mind", mind)
 
@@ -163,7 +163,7 @@ def serve_multipart(context, event):
             for filed_name in files:
                 file_details = files[filed_name]
                 print(f"process file:{file_details.filename}")
-                filename = context.data_path + "/upload/" + id_generator() + "_" + file_details.filename
+                filename = context.data_dir + "/upload/" + id_generator() + "_" + file_details.filename
                 file_details.save_as(filename)
                 print(f"filename:{filename}") 
 
@@ -185,7 +185,6 @@ def serve_multipart(context, event):
 
 
 def simple_app(environ, start_response):
-    print(f"main_context:{main_context}")
     result = {}
     if is_form_request(environ):
         forms, files = parse_form_data(environ)
@@ -193,7 +192,7 @@ def simple_app(environ, start_response):
             try:
                 file_details = files[filed_name]
                 print(f"process file:{file_details.filename}")
-                filename = "/home/nori/data/upload/" + id_generator() + "_" + file_details.filename
+                filename = main_context.data_dir + "/upload/" + id_generator() + "_" + file_details.filename
                 file_details.save_as(filename) 
 
                 classification_result = []
@@ -215,16 +214,17 @@ def simple_app(environ, start_response):
     content = json.dumps(result)
     content = [content.encode('utf-8')]
     start_response(status, headers)
+    return content
 
 
 class Context:
-    data_dir = "/home/nori/data"
+    data_dir = ""
     hparams = None
     mind = None
 
 if __name__ == "__main__":
     main_context = Context()
-    init(main_context, "micromind-model-phinet", "/home/nori/data", "phinet.py")
+    init(main_context, "micromind-model-phinet", "/home/dev/data", "phinet.py")
 
     with make_server('', 8051, simple_app) as httpd:
         print("Serving on port 8051...")

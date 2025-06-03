@@ -1,7 +1,7 @@
 import requests
 
 url = "http://localhost:8051"
-file_path = "test-image.png"
+file_path = "test_img/viale.jpg"
 
 with open(file_path, "rb") as file:
     files = {'file': file}
