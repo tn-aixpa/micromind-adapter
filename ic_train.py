@@ -216,7 +216,7 @@ def train(context, conf_name: str, dataset: str, data_dir: str, epochs: int):
     model_path = get_latest_checkpoint(exp_folder) + "/state-dict.pth.tar"
 
     model = project.log_model(
-        name="micromind-model-" + hparams.model,
+        name="ic-" + hparams.model,
         kind="model",
         source=model_path,
         algorithm=hparams.model,
