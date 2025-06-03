@@ -185,6 +185,7 @@ def serve_multipart(context, event):
 
 
 def simple_app(environ, start_response):
+    print(f"main_context:{main_context}")
     result = {}
     if is_form_request(environ):
         forms, files = parse_form_data(environ)
