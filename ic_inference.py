@@ -146,12 +146,12 @@ def id_generator(size=8, chars=string.ascii_uppercase + string.digits):
 def serve_multipart(context, event):
     try:
         content_type = event.headers.get('Content-Type', '')
-        context.logger.info(f"Received multipart event: {content_type}")
+        print(f"Received multipart event: {content_type}")
         result = {}
         #environ = io.BytesIO(event.body)
         #environ = event.body
         if 'multipart/form-data' in content_type:
-            context.logger.info("serve multipart buffer")
+            print("serve multipart buffer")
             environ = {
                 "wsgi.input": io.BytesIO(event.body),
                 "CONTENT_LENGTH": str(len(event.body)),
@@ -159,13 +159,13 @@ def serve_multipart(context, event):
                 "REQUEST_METHOD": "POST",
             }            
             forms, files = parse_form_data(environ)
-            context.logger.info("serve multipart files")
+            print("serve multipart files")
             for filed_name in files:
                 file_details = files[filed_name]
-                context.logger.info(f"process file:{file_details.filename}")
+                print(f"process file:{file_details.filename}")
                 filename = context.data_path + "/upload/" + id_generator() + "_" + file_details.filename
                 file_details.save_as(filename)
-                context.logger.info(f"filename:{filename}") 
+                print(f"filename:{filename}") 
 
                 classification_result = []
                 result[filed_name] = classification_result
